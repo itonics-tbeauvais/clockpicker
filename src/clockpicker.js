@@ -97,7 +97,7 @@
 			input = isInput ? element : element.find('input'),
 			addon = element.find('.input-group-addon'),
 			self = this,
-			timer;
+			timer,
       showHideTO;
 
 		this.id = uniqueId('cp');
