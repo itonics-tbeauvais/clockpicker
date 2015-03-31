@@ -56,10 +56,10 @@
 	}
 
 	// Clock size
-	var dialRadius = 100,
-		outerRadius = 80,
+  var dialRadius = 90,
+    outerRadius = 74,
 		// innerRadius = 80 on 12 hour clock
-		innerRadius = 54,
+    innerRadius = 52,
 		tickRadius = 13,
 		diameter = dialRadius * 2,
 		duration = transitionSupported ? 350 : 1;
@@ -98,6 +98,7 @@
 			addon = element.find('.input-group-addon'),
 			self = this,
 			timer;
+      showHideTO;
 
 		this.id = uniqueId('cp');
 		this.element = element;
@@ -190,7 +191,7 @@
 			tick = tickTpl.clone();
 			radian = i / 6 * Math.PI;
 			var radius = outerRadius;
-			tick.css('font-size', '120%');
+        tick.css('font-size', '96%');
 			tick.css({
 				left: dialRadius + Math.sin(radian) * radius - tickRadius,
 				top: dialRadius - Math.cos(radian) * radius - tickRadius
@@ -211,7 +212,7 @@
 					top: dialRadius - Math.cos(radian) * radius - tickRadius
 				});
 				if (inner) {
-					tick.css('font-size', '120%');
+          tick.css('font-size', '96%');
 				}
 				tick.html(i === 0 ? '00' : i);
 				hoursView.append(tick);
@@ -227,7 +228,7 @@
 				left: dialRadius + Math.sin(radian) * outerRadius - tickRadius,
 				top: dialRadius - Math.cos(radian) * outerRadius - tickRadius
 			});
-			tick.css('font-size', '120%');
+      tick.css('font-size', '100%');
 			tick.html(leadingZero(i));
 			minutesView.append(tick);
 			tick.on(mousedownEvent, mousedown);
@@ -313,7 +314,31 @@
 				// Unbind mousemove event
 				$doc.off(mousemoveEvent);
 			});
+
+
 		}
+
+
+    input.on('keydown', function (e) {
+      // If enter key is pressed prevent default action and set selected value
+      if (e.which == "13") {
+        e.preventDefault();
+        self.hide();
+        var last = self.input.prop('value'),
+          value = leadingZero(self.hours) + ':' + leadingZero(self.minutes);
+        if (self.options.twelvehour) {
+          value = value + self.amOrPm;
+        }
+
+        self.input.prop('value', value);
+        if (value !== last) {
+          self.input.triggerHandler('change');
+          if (!self.isInput) {
+            self.element.trigger('change');
+          }
+        }
+      }
+    })
 
 		if (svgSupported) {
 			// Draw clock hands and others
@@ -463,7 +488,11 @@
 
 		// Set position
 		this.locate();
-
+    self.popover.show();
+    self.showHideTO = setTimeout(function () {
+      clearTimeout(self.showHideTO);
+      self.popover.addClass('open');
+    }, 10);
 		this.isShown = true;
 
 		// Hide when clicking or tabbing on any element except the clock, input and addon
@@ -473,6 +502,7 @@
 					target.closest(self.addon).length === 0 &&
 					target.closest(self.input).length === 0) {
 				self.hide();
+        self.popover.removeClass('open');
 			}
 		});
 
@@ -480,6 +510,7 @@
 		$doc.on('keyup.clockpicker.' + this.id, function(e){
 			if (e.keyCode === 27) {
 				self.hide();
+        self.popover.removeClass('open');
 			}
 		});
 	};
@@ -487,12 +518,17 @@
 	// Hide popover
 	ClockPicker.prototype.hide = function(){
 		this.isShown = false;
+    var self = this;
 
 		// Unbinding events on document
 		$doc.off('click.clockpicker.' + this.id + ' focusin.clockpicker.' + this.id);
 		$doc.off('keyup.clockpicker.' + this.id);
 
-		this.popover.hide();
+    this.popover.removeClass('open');
+    self.showHideTO = setTimeout(function () {
+      clearTimeout(self.showHideTO);
+      self.popover.hide();
+    }, 200);
 	};
 
 	// Toggle to hours or minutes view
