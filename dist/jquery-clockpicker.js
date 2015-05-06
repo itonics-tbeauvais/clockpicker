@@ -331,7 +331,7 @@
         }
 
         if(last !== '' && last.length > 0){
-          self.input.trigger('change');
+          self.input.trigger('update');
           return false;
         }
 
