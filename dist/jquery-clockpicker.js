@@ -330,6 +330,11 @@
           value = value + self.amOrPm;
         }
 
+        if(last !== '' && last.length > 0){
+          self.input.trigger('change');
+          return false;
+        }
+
         self.input.prop('value', value);
         if (value !== last) {
           self.input.triggerHandler('change');
